@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QLabel, QPushButton, QFileDialog, QDateEdit, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QGridLayout, QLabel, QPushButton, QFileDialog, QDateEdit, QWidget, QVBoxLayout, QHBoxLayout, QComboBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
@@ -34,6 +34,12 @@ class MainWindow(QMainWindow):
         self.end_date_edit = QDateEdit()
         self.end_date_edit.setCalendarPopup(True)
 
+        # create a combo box for selecting the graph type
+        self.graph_type_label = QLabel("Graph Type:")
+        self.graph_type_combo_box = QComboBox()
+        self.graph_type_combo_box.addItem("Line Graph")
+        self.graph_type_combo_box.addItem("Bar Graph")
+
         # create a button to generate the graph
         self.generate_graph_button = QPushButton("Generate Graph")
         self.generate_graph_button.clicked.connect(self.generate_graph)
@@ -50,6 +56,8 @@ class MainWindow(QMainWindow):
         self.top_layout.addWidget(self.start_date_edit)
         self.top_layout.addWidget(self.end_date_label)
         self.top_layout.addWidget(self.end_date_edit)
+        self.top_layout.addWidget(self.graph_type_label)
+        self.top_layout.addWidget(self.graph_type_combo_box)
         self.top_layout.addWidget(self.generate_graph_button)
 
         # create a layout for the entire GUI and add the top and canvas layouts to it
@@ -65,7 +73,7 @@ class MainWindow(QMainWindow):
     def select_file(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(self, "Select CSV File", "", "CSV Files (*.csv)", options = options)
+        filename, _ = QFileDialog.getOpenFileName(self, "Select CSV File", "", "CSV Files (*.csv)", options=options)
         if filename:
             self.filename_label.setText(filename)
 
@@ -83,7 +91,14 @@ class MainWindow(QMainWindow):
 
         self.figure.clear()
         ax = self.figure.add_subplot(111)
-        ax.plot(data[ "Date" ], data[ "Temperature" ])
+
+        # Add user choice for type of graph
+        graph_type = self.graph_type_combo_box.currentText()
+        if graph_type=="Line Graph":
+            ax.plot(data[ "Date" ], data[ "Temperature" ])
+        elif graph_type=="Bar Graph":
+            ax.bar(data[ "Date" ], data[ "Temperature" ])
+
         ax.set_xlabel("Date")
         ax.set_ylabel("Temperature")
         self.canvas.draw()
